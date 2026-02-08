@@ -6,10 +6,11 @@ from langchain_community.vectorstores import FAISS
 
 load_dotenv(override=True)
 
+print("model name", os.getenv("HF_EMBEDDINGS_MODEL"))
 embeddings_model = HuggingFaceEmbeddings(
-    model_name=os.getenv("HF_EMBEDDINGS_MODEL"),
-    encode_kwargs={"normalize_embeddings": True},
-    model_kwargs={"token": os.getenv("HUGGING_FACE_TOKEN")},
+    model_name = os.getenv("HF_EMBEDDINGS_MODEL"),
+    encode_kwargs = {"normalize_embeddings": True},
+    model_kwargs = {"token": os.getenv("HUGGING_FACE_TOKEN")},
 )
 BASE_DIR = Path(__file__).resolve().parent
 print(BASE_DIR)
@@ -21,14 +22,31 @@ vector_db = FAISS.load_local(
     allow_dangerous_deserialization=True,
 )
 
-# Query sentences:
-query = input("Enter a name to search for similar names: ")
+def run_search(query: str, k: int = 5):
+    hits = vector_db.similarity_search_with_score(query, k=k)
 
-# Find the closest 5 chunks for each query based on similarity measure
-hits = vector_db.similarity_search_with_score(query, k=5)
-print("\nQuery:", query)
-print("Best Match (Most similar name): ",hits[0][0].page_content, f"Score: {hits[0][1]:.4f}")
-print("Top 4 most similar chunks:")
-for hit in hits[1:]:
-    print(hit[0].page_content, f"Score: {hit[1]:.4f}")
-    print("-----")
+    if not hits:
+        return {
+            "best_match": None,
+            "matches": []
+        }
+
+    # Best match
+    best_doc, best_score = hits[0]
+    best_match = {
+        "name": best_doc.page_content,
+        "score": float(round(float(best_score), 4))
+    }
+
+    # Other matches
+    matches = []
+    for doc, score in hits[1:]:
+        matches.append({
+            "name": doc.page_content,
+            "score": float(round(float(score), 4))
+        })
+
+    return {
+        "best_match": best_match,
+        "matches": matches
+    }
