@@ -26,11 +26,14 @@ The application returns:
 - **FAISS Vector Database**
 - **Streamlit**
 - **dotenv**
+- **Pydantic_ai**
+- **fastapi**
 
 ---
 
 ## Project Structure
 semantic-search-app/
+
 │
 ├── app.py # Streamlit application
 ├── requirements.txt
@@ -38,8 +41,8 @@ semantic-search-app/
 │
 ├── data/
 │ └── semantic-search/
-│ └── index/
-│ └── faiss1/ # FAISS index files
+│    └── index/
+│    └── faiss1/ # FAISS index files
 |___ingestion.py 
 |__retrieval.py
 
